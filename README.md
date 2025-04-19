@@ -17,3 +17,7 @@ Role-based rules were implemented in Firestore to restrict:
 - Users: Can only access their own data
 
 Security is enforced using Firestore’s built-in rules + UID-based verification.
+
+## 🌐 Live Demo
+[Click here to view the live site](https://operationscheduler.netlify.app)
+
