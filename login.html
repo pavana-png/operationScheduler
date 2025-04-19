@@ -20,6 +20,14 @@
       padding: 10px;
       margin: 10px 0;
     }
+    p.register-link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    p.register-link a {
+      color: #0066cc;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -34,10 +42,16 @@
 
   <p id="message"></p>
 
+  <!-- link to register -->
+  <p class="register-link">
+    Don’t have an account? 
+    <a href="register.html">Register here</a>
+  </p>
+
   <!-- ✅ COMPATIBLE Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <script src="main.js"></script>
 
@@ -59,47 +73,43 @@
     const message = document.getElementById("message");
   
     loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+      e.preventDefault();
 
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const password = document.getElementById("password").value;
-  message.textContent = ""; // Clear any previous messages
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+      message.textContent = ""; // Clear any previous messages
 
-  try {
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    const user = userCredential.user;
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-    const doc = await db.collection("users").doc(user.uid).get();
-    const userData = doc.data();
+        const doc = await db.collection("users").doc(user.uid).get();
+        const userData = doc.data();
 
-    logAction("User Logged In", `Email: ${email}`);
+        logAction("User Logged In", `Email: ${email}`);
 
-    if (userData.role === "admin") {
-      window.location.href = "admin_dashboard.html";
-    } else if (userData.role === "doctor") {
-      window.location.href = "doctor_dashboard.html";
-    } else {
-      message.textContent = "No valid role assigned to this account.";
-    }
+        if (userData.role === "admin") {
+          window.location.href = "admin_dashboard.html";
+        } else if (userData.role === "doctor") {
+          window.location.href = "doctor_dashboard.html";
+        } else {
+          message.textContent = "No valid role assigned to this account.";
+        }
+      } catch (error) {
+        const errorCode = error.code;
 
-  } catch (error) {
-    const errorCode = error.code;
-
-    if (errorCode === "auth/user-not-found") {
-      message.textContent = "No account found for this email.";
-    } else if (errorCode === "auth/wrong-password") {
-      message.textContent = "Invalid password. Please try again.";
-    } else if (errorCode === "auth/invalid-email") {
-      message.textContent = "Please enter a valid email address.";
-    } else {
-      message.textContent = "Login failed: " + error.message;
-    }
-  }
-});
-
-
+        if (errorCode === "auth/user-not-found") {
+          message.textContent = "No account found for this email.";
+        } else if (errorCode === "auth/wrong-password") {
+          message.textContent = "Invalid password. Please try again.";
+        } else if (errorCode === "auth/invalid-email") {
+          message.textContent = "Please enter a valid email address.";
+        } else {
+          message.textContent = "Login failed: " + error.message;
+        }
+      }
+    });
   </script>
-  
 
 </body>
 </html>
