@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Schedule Surgery</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; max-width: 600px; margin: auto;background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed; }
+    input, select, textarea, button { width: 100%; margin: 10px 0; padding: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>Schedule a New Surgery</h2>
+
+  <form id="surgeryForm">
+    <input type="date" id="date" required />
+    <input type="time" id="time" required />
+    <input type="text" id="otNumber" placeholder="OT Number" required />
+    <input type="text" id="patientId" placeholder="Patient ID" required />
+    <input type="text" id="doctorId" placeholder="Doctor ID" required />
+    <input type="text" id="anesthesia" placeholder="Anesthesia Type" />
+    <input type="text" id="anesthesiologist" placeholder="Anesthesiologist Name" />
+    <textarea id="materials" placeholder="Drugs/Instruments/Materials"></textarea>
+    <button type="submit">Schedule Surgery</button>
+  </form>
+
+  <p id="message"></p>
+
+  <!-- ✅ COMPATIBLE Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="main.js"></script>
+
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+  authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+  projectId: "operationscheduler-1cc5c",
+  storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+  messagingSenderId: "579389730611",
+  appId: "1:579389730611:web:229fb1ee36633f40df1846"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    const form = document.getElementById('surgeryForm');
+    const msg = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        otNumber: document.getElementById('otNumber').value,
+        patientId: document.getElementById('patientId').value,
+        doctorId: document.getElementById('doctorId').value,
+        anesthesia: document.getElementById('anesthesia').value,
+        anesthesiologist: document.getElementById('anesthesiologist').value,
+        materials: document.getElementById('materials').value,
+        status: 'scheduled',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      try {
+        await db.collection('surgeries').add(data);
+        msg.textContent = 'Surgery scheduled successfully.';
+        form.reset();
+      } catch (err) {
+        msg.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    logAction("Surgery Scheduled", `Doctor: ${doctorId}, Patient: ${patientId}, OT: ${otNumber}`);
+
+  </script>
+
+</body>
+</html>

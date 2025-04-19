@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OT Analytics</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; max-width: 700px; margin: auto; 
+      background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;}
+    .summary { margin-top: 2rem; padding: 1rem; background: #e2e2e2; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <h2>Operation Theater Analytics</h2>
+  <div class="summary" id="analytics"></div>
+
+  <!-- ✅ COMPATIBLE Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="main.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+      authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+      projectId: "operationscheduler-1cc5c",
+      storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+      messagingSenderId: "579389730611",
+      appId: "1:579389730611:web:229fb1ee36633f40df1846"
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("Please log in to view analytics.");
+        window.location.href = "login.html";
+        return;
+      }
+  
+      console.log("✅ Logged in as:", user.email);
+  
+      const analyticsDiv = document.getElementById('analytics');
+  
+      try {
+        // Fetch total surgeries
+        const surgeriesSnapshot = await db.collection('surgeries').get();
+        const total = surgeriesSnapshot.size;
+  
+        // Fetch completed reports
+        const reportsSnapshot = await db.collection('reports').get();
+        const completed = reportsSnapshot.size;
+  
+        const scheduled = total - completed;
+  
+        analyticsDiv.innerHTML = `
+          <p><strong>Total Surgeries:</strong> ${total}</p>
+          <p><strong>Scheduled:</strong> ${scheduled}</p>
+          <p><strong>Completed:</strong> ${completed}</p>
+        `;
+      } catch (err) {
+        console.error("🔥 Error fetching analytics:", err.message);
+        analyticsDiv.innerHTML = `<p style="color: red;">Error loading analytics: ${err.message}</p>`;
+      }
+    });
+  </script>
+
+</body>
+</html>

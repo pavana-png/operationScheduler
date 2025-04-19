@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Operation Scheduler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      max-width: 400px;
+      margin: auto;
+      background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Login</h2>
+
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+  </form>
+
+  <p id="message"></p>
+
+  <!-- ✅ COMPATIBLE Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="main.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+      authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+      projectId: "operationscheduler-1cc5c",
+      storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+      messagingSenderId: "579389730611",
+      appId: "1:579389730611:web:229fb1ee36633f40df1846"
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  
+    const loginForm = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+  
+    loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const password = document.getElementById("password").value;
+  message.textContent = ""; // Clear any previous messages
+
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    const doc = await db.collection("users").doc(user.uid).get();
+    const userData = doc.data();
+
+    logAction("User Logged In", `Email: ${email}`);
+
+    if (userData.role === "admin") {
+      window.location.href = "admin_dashboard.html";
+    } else if (userData.role === "doctor") {
+      window.location.href = "doctor_dashboard.html";
+    } else {
+      message.textContent = "No valid role assigned to this account.";
+    }
+
+  } catch (error) {
+    const errorCode = error.code;
+
+    if (errorCode === "auth/user-not-found") {
+      message.textContent = "No account found for this email.";
+    } else if (errorCode === "auth/wrong-password") {
+      message.textContent = "Invalid password. Please try again.";
+    } else if (errorCode === "auth/invalid-email") {
+      message.textContent = "Please enter a valid email address.";
+    } else {
+      message.textContent = "Login failed: " + error.message;
+    }
+  }
+});
+
+
+  </script>
+  
+
+</body>
+</html>

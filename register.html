@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register | Operation Scheduler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      max-width: 400px;
+      margin: auto;
+      background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Register</h2>
+
+  <form id="registerForm">
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    
+    <select id="role" required>
+      <option value="">Select Role</option>
+      <option value="admin">Admin</option>
+      <option value="doctor">Doctor</option>
+    </select>
+
+    <button type="submit">Register</button>
+  </form>
+
+  <p id="message"></p>
+
+  <!-- ✅ COMPATIBLE Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="main.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+      authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+      projectId: "operationscheduler-1cc5c",
+      storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+      messagingSenderId: "579389730611",
+      appId: "1:579389730611:web:229fb1ee36633f40df1846"
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  
+    const registerForm = document.getElementById("registerForm");
+    const message = document.getElementById("message");
+  
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+  
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
+  
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+  
+        // Save additional user info
+        await db.collection("users").doc(user.uid).set({
+          name: name,
+          email: email,
+          role: role,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+  
+        // Log the registration
+        logAction("User Registered", `Registered with email ${email}`);
+  
+        alert("Registration successful! Please login.");
+        window.location.href = "login.html"; // ✅ redirect to login
+      } catch (error) {
+        console.error("Registration Error:", error.message);
+        message.textContent = "Error: " + error.message;
+      }
+    });
+  </script>
+  
+
+</body>
+</html>

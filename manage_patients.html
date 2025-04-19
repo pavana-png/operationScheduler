@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Patients</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; max-width: 700px; margin: auto;
+        background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    .card { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 6px; }
+  </style>
+</head>
+<body>
+
+  <h2>Patient Management</h2>
+
+  <form id="patientForm">
+    <input type="text" id="name" placeholder="Patient Name" required />
+    <input type="number" id="age" placeholder="Age" required />
+    <input type="text" id="gender" placeholder="Gender" required />
+    <input type="text" id="phone" placeholder="Phone" required />
+    <input type="text" id="condition" placeholder="Condition" required />
+    <input type="date" id="admittedOn" placeholder="Admitted On" required />
+    <button type="submit">Add Patient</button>
+  </form>
+  
+
+  <div id="patientList"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+      authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+      projectId: "operationscheduler-1cc5c",
+      storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+      messagingSenderId: "579389730611",
+      appId: "1:579389730611:web:229fb1ee36633f40df1846"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("Login required.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      if (userDoc.data().role !== "admin") {
+        alert("Access denied. Admin only.");
+        return;
+      }
+
+      loadPatients();
+
+      document.getElementById('patientForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const age = parseInt(document.getElementById('age').value.trim());
+  const gender = document.getElementById('gender').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const condition = document.getElementById('condition').value.trim();
+  const admittedOn = document.getElementById('admittedOn').value;
+
+  await db.collection("patients").add({ name, age, gender, phone, condition, admittedOn });
+  alert("Patient added!");
+  e.target.reset();
+  loadPatients();
+});
+
+async function loadPatients() {
+  const snapshot = await db.collection("patients").get();
+  const container = document.getElementById("patientList");
+  container.innerHTML = "<h3>Existing Patients:</h3>";
+  
+  snapshot.forEach(doc => {
+    const patient = doc.data();
+    const patientId = doc.id; // Get the document ID as the Patient ID
+
+    container.innerHTML += `
+      <div class="card">
+        <strong>Name:</strong> ${patient.name}<br>
+        <strong>Age:</strong> ${patient.age}<br>
+        <strong>Gender:</strong> ${patient.gender}<br>
+        <strong>Phone:</strong> ${patient.phone}<br>
+        <strong>Condition:</strong> ${patient.condition}<br>
+        <strong>Admitted On:</strong> ${patient.admittedOn}<br>
+        <strong>Patient ID:</strong> ${patientId}
+      </div>
+    `;
+  });
+}
+    });
+  </script>
+</body>
+</html>

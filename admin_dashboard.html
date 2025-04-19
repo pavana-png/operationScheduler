@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f5f5f5;
+      background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .dashboard {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-top: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .card button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    #logoutBtn {
+      margin-top: 3rem;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Admin Dashboard</h2>
+
+  <div class="dashboard">
+    <div class="card">
+      <h3>Manage Doctors</h3>
+      <button onclick="location.href='manage_doctors.html'">Open</button>
+    </div>
+
+    <div class="card">
+      <h3>Manage Patients</h3>
+      <button onclick="location.href='manage_patients.html'">Open</button>
+    </div>
+
+    <div class="card">
+      <h3>Schedule Surgery</h3>
+      <button onclick="location.href='schedule_form.html'">Schedule</button>
+    </div>
+
+    <div class="card">
+      <h3>View OT Schedules</h3>
+      <button onclick="location.href='view_schedule.html'">View</button>
+    </div>
+
+    <div class="card">
+      <h3>OT Analytics</h3>
+      <button onclick="location.href='analytics.html'">View</button>
+    </div>
+  </div>
+
+  <button id="logoutBtn">Logout</button>
+
+ <!-- ✅ COMPATIBLE Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="main.js"></script>
+
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+  authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+  projectId: "operationscheduler-1cc5c",
+  storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+  messagingSenderId: "579389730611",
+  appId: "1:579389730611:web:229fb1ee36633f40df1846"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    });
+
+    // Redirect if not logged in
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Surgery Report</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; max-width: 600px; margin: auto;
+      background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed; }
+    input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>Upload Post-Operative Report</h2>
+
+  <form id="reportForm">
+    <input type="text" id="surgeryId" placeholder="Surgery ID" required />
+    <textarea id="report" placeholder="Report / Notes" required></textarea>
+    <button type="submit">Submit Report</button>
+  </form>
+
+  <p id="message"></p>
+
+  <!-- ✅ COMPATIBLE Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="main.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+      authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+      projectId: "operationscheduler-1cc5c",
+      storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+      messagingSenderId: "579389730611",
+      appId: "1:579389730611:web:229fb1ee36633f40df1846"
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+  
+    const form = document.getElementById('reportForm');
+    const msg = document.getElementById('message');
+  
+    // 🔍 Check logged-in user on page load
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        console.log("✅ Logged in UID:", user.uid);
+        try {
+          const userDoc = await db.collection("users").doc(user.uid).get();
+          if (userDoc.exists) {
+            console.log("👤 Logged-in User Name:", userDoc.data().name || "(name not set)");
+            console.log("🔐 Role:", userDoc.data().role || "(role not set)");
+          } else {
+            console.log("⚠️ No user document found.");
+          }
+        } catch (err) {
+          console.error("🔥 Error fetching user document:", err.message);
+        }
+      } else {
+        console.warn("⚠️ No user is logged in.");
+      }
+    });
+  
+    // 📝 Handle form submission
+    form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const surgeryId = document.getElementById('surgeryId').value.trim();
+  const report = document.getElementById('report').value.trim();
+  const user = firebase.auth().currentUser;
+
+  console.log("📄 Creating report for:", surgeryId);
+
+  if (!user) {
+    msg.textContent = "You must be logged in.";
+    return;
+  }
+
+  try {
+    await db.collection("reports").add({
+      surgeryId: surgeryId,
+      doctorId: user.uid,
+      report: report,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    msg.textContent = "✅ Report uploaded successfully.";
+    logAction("Report Created", `Surgery ID: ${surgeryId}`);
+    form.reset();
+  } catch (err) {
+    msg.textContent = "❌ Error: " + err.message;
+    console.error("🔥 Firestore Error:", err.message);
+  }
+});
+
+  </script>
+  
+
+</body>
+</html>

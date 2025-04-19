@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Doctors</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; max-width: 700px; margin: auto;
+        background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    .card { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 6px; }
+  </style>
+</head>
+<body>
+
+  <h2>Doctor Management</h2>
+
+  <form id="doctorForm">
+    <input type="text" id="name" placeholder="Doctor Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="phone" placeholder="Phone" required />
+    <input type="text" id="specialization" placeholder="Specialization" required />
+    <button type="submit">Add Doctor</button>
+  </form>
+  
+
+  <div id="doctorList"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+      authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+      projectId: "operationscheduler-1cc5c",
+      storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+      messagingSenderId: "579389730611",
+      appId: "1:579389730611:web:229fb1ee36633f40df1846"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) {
+        alert("Login required.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      if (userDoc.data().role !== "admin") {
+        alert("Access denied. Admin only.");
+        return;
+      }
+
+      loadDoctors();
+
+      document.getElementById('doctorForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const specialization = document.getElementById('specialization').value.trim();
+
+  await db.collection("doctors").add({ name, email, phone, specialization });
+  alert("Doctor added!");
+  e.target.reset();
+  loadDoctors();
+});
+
+
+      async function loadDoctors() {
+  const snapshot = await db.collection("doctors").get();
+  const container = document.getElementById("doctorList");
+  container.innerHTML = "<h3>Existing Doctors:</h3>";
+  
+  snapshot.forEach(doc => {
+    const doctor = doc.data();
+    const doctorId = doc.id; // Get the document ID as the Doctor ID
+
+    container.innerHTML += `
+      <div class="card">
+        <strong>Name:</strong> ${doctor.name}<br>
+        <strong>Specialization:</strong> ${doctor.specialization}<br>
+        <strong>Doctor ID:</strong> ${doctorId}
+      </div>
+    `;
+  });
+}
+
+    });
+    
+  </script>
+</body>
+</html>

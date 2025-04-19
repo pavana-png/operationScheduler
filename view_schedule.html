@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Surgery Schedules</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; max-width: 800px; margin: auto;
+      background-image: url("https://i.pinimg.com/736x/3f/f2/36/3ff236992de0cf633c7676423e48edaf.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed; }
+    .entry { background: #f2f2f2; margin: 10px 0; padding: 10px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+
+  <h2>All Scheduled Surgeries</h2>
+  <div id="scheduleList"></div>
+
+  <!-- ✅ COMPATIBLE Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="main.js"></script>
+
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyD8JYBjc8dGuN7quaMLJzbHugH9HIef3I0",
+  authDomain: "operationscheduler-1cc5c.firebaseapp.com",
+  projectId: "operationscheduler-1cc5c",
+  storageBucket: "operationscheduler-1cc5c.firebasestorage.app",
+  messagingSenderId: "579389730611",
+  appId: "1:579389730611:web:229fb1ee36633f40df1846"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const list = document.getElementById('scheduleList');
+const auth = firebase.auth();
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // User is logged in
+    db.collection('surgeries').orderBy('date').get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          list.innerHTML = "<p>No surgeries scheduled.</p>";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          list.innerHTML += `
+            <div class="entry">
+              <strong>Date:</strong> ${d.date} | <strong>Time:</strong> ${d.time}<br>
+              <strong>OT:</strong> ${d.otNumber} | <strong>Doctor ID:</strong> ${d.doctorId}<br>
+              <strong>Patient ID:</strong> ${d.patientId}<br>
+              <strong>Status:</strong> ${d.status}
+            </div>
+          `;
+        });
+      })
+      .catch(err => {
+        console.error("🔥 Error fetching surgeries:", err.message);
+        alert("Permission error: " + err.message);
+      });
+
+  } else {
+    // Not logged in, redirect to login
+    window.location.href = "login.html";
+  }
+});
+
+  </script>
+
+</body>
+</html>
